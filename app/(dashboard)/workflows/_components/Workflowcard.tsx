@@ -1,15 +1,33 @@
 "use client";
-import { buttonVariants } from "@/components/ui/button";
+import TolltipWrapper from "@/components/TolltipWrapper";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { WorkflowStatus } from "@/types/workflow";
 import { Workflow } from "@prisma/client";
-import { FileTextIcon, PlayIcon, Shuffle, ShuffleIcon } from "lucide-react";
+import {
+  FileTextIcon,
+  MoreVerticalIcon,
+  PlayIcon,
+  Shuffle,
+  ShuffleIcon,
+  TrashIcon,
+} from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
+import DeleteWorkflowDialog from "./DeleteWorkflowDialog";
 
 const statusColors = {
-  [WorkflowStatus.DRAFT]: "bg-yellow-400 text-yellow-600",
+  [WorkflowStatus.DRAFT]:
+    "ring-2 ring-inset ring-[#e8e8e8] shadow-sm text-yellow-600",
   [WorkflowStatus.PUBLISHED]: "bg-primary",
 };
 
@@ -18,25 +36,25 @@ function Workflowcard({ workflow }: { workflow: Workflow }) {
   return (
     <>
       <Card className="border border-separate shadow-sm rounded-lg overflow-hidden hover:shadow-md dark:shadow-primary/30">
-        <CardContent className="p-4 flex items-center justify-between h-[100px]">
-          <div className="flex items-center justify-end space-x-3">
+        <CardContent className="p-4 flex items-start flex-col justify-between space-y-4 h-[150px]">
+          <div className="flex items-start justify-end flex-col space-x-3">
             <div
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
+                "w-10 h-10 rounded-full flex items-center justify-center mb-4",
                 statusColors[workflow.status as WorkflowStatus]
               )}
             >
               {isDraft ? (
-                <FileTextIcon className="h-5 w-5" />
+                <FileTextIcon className="h-6 w-6" />
               ) : (
-                <PlayIcon className="h-5 w-5 text-white" />
+                <PlayIcon className="h-6 w-6 text-white" />
               )}
             </div>
             <div>
               <h3 className="text-muted-foreground flex items-center">
                 <Link
                   href={`/workflow/editor/${workflow.id}`}
-                  className="flex items-center hover:underline uppercase text-sm font-semibold"
+                  className="flex items-center uppercase text-base font-semibold"
                 >
                   {workflow.name}
                 </Link>
@@ -48,7 +66,7 @@ function Workflowcard({ workflow }: { workflow: Workflow }) {
               </h3>
             </div>
           </div>
-          <div className="">
+          <div className="flex space-x-4">
             <Link
               href={`/workflow/editor/${workflow.id}`}
               className={cn(
@@ -62,9 +80,44 @@ function Workflowcard({ workflow }: { workflow: Workflow }) {
               <ShuffleIcon size={16} />
               Edit!!
             </Link>
+            <WorkflowActions workflowName={workflow.name} />
           </div>
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+function WorkflowActions({ workflowName }: { workflowName: String }) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  return (
+    <>
+      <DeleteWorkflowDialog
+        open={showDeleteDialog}
+        setOpen={setShowDeleteDialog}
+        workflowName={workflowName}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"outline"} size={"sm"}>
+            <TolltipWrapper content={"More Actions!!"}>
+              <div className="flex items-center justify-center w-full h-full">
+                <MoreVerticalIcon size={18} />
+              </div>
+            </TolltipWrapper>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive flex items-center gap-2"
+            onSelect={() => setShowDeleteDialog((prev) => !prev)}
+          >
+            <TrashIcon size={16} /> Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 }
