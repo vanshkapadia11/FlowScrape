@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "./globals.css";
-
+import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],
@@ -31,10 +32,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
-        <AppProviders>{children}</AppProviders>
-      </body>
-    </html>
+    <ClerkProvider
+      afterSignOutUrl={"/sign-in"}
+      appearance={{
+        elements: {
+          formButtomPrimary:
+            "bg-primary hover:bg-primary/90 text-sm !shadow-none",
+        },
+      }}
+    >
+      <html lang="en">
+        <body className={`${poppins.variable} antialiased`}>
+          <AppProviders>{children}</AppProviders>
+          <Toaster richColors />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

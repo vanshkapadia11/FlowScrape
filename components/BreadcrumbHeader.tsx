@@ -12,10 +12,10 @@ import { MobileSidebar } from "./Sidebar";
 function BreadcrumbHeader() {
   const pathName = usePathname();
   const path = pathName === "/" ? [""] : pathName?.split("/");
+  // const path = pathName;
   return (
     <>
       <div className="flex items-center flex-start">
-        <MobileSidebar />
         <Breadcrumb>
           <BreadcrumbList>
             {path.map((path, index) => (
@@ -27,12 +27,14 @@ function BreadcrumbHeader() {
                   >
                     {path === "" ? "Home" : path}
                   </BreadcrumbLink>
+                  /
                 </BreadcrumbItem>
               </React.Fragment>
             ))}
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+      {/* <MobileSidebar /> */}
     </>
   );
 }
