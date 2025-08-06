@@ -1,4 +1,5 @@
 "use client";
+import { DeleteWorkflow } from "@/actions/workflows/deleteWorkflow";
 import { AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -10,16 +11,36 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
-  workflowName: String;
+  workflowName: string;
+  workflowId: string;
 }
 
-function DeleteWorkflowDialog({ open, setOpen, workflowName }: Props) {
+function DeleteWorkflowDialog({
+  open,
+  setOpen,
+  workflowName,
+  workflowId,
+}: Props) {
   const [confirmText, setConfirmText] = useState("");
+  const deleteMutation = useMutation({
+    mutationFn: DeleteWorkflow,
+    onSuccess: () => {
+      toast.success("Deleted The Workflow Succesfully!!", { id: workflowId });
+      setConfirmText("");
+    },
+    onError: () => {
+      toast.error("Encontered An Error In Deleting The Workflow!! ", {
+        id: workflowId,
+      });
+    },
+  });
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogContent>
@@ -45,8 +66,17 @@ function DeleteWorkflowDialog({ open, setOpen, workflowName }: Props) {
           </div>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction disabled={confirmText !== workflowName}>
+          <AlertDialogCancel onClick={() => setConfirmText("")}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={confirmText !== workflowName || deleteMutation.isPending}
+            onClick={() => {
+              toast.loading("Deleting Workflow...", { id: workflowId });
+              deleteMutation.mutate(workflowId);
+            }}
+            className="bg-destructive text-zinc-50 hover:bg-destructive/90"
+          >
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>
