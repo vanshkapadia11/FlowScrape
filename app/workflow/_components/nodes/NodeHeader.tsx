@@ -1,13 +1,29 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
 import { TaskRegistry } from "@/lib/workflow/task/registry";
+import { AppNode } from "@/types/appNode";
 import { TaskType } from "@/types/task";
-import { CoinsIcon, GripVerticalIcon } from "lucide-react";
+import { useReactFlow } from "@xyflow/react";
+import {
+  CoinsIcon,
+  CopyIcon,
+  GripVerticalIcon,
+  HandCoins,
+  TrashIcon,
+} from "lucide-react";
 import React from "react";
 
-function NodeHeader({ taskType }: { taskType: TaskType }) {
+function NodeHeader({
+  taskType,
+  nodeId,
+}: {
+  taskType: TaskType;
+  nodeId: string;
+}) {
   const task = TaskRegistry[taskType];
+  const { deleteElements, getNode, addNodes } = useReactFlow();
   return (
     <div className="flex items-center gap-2 p-2">
       <task.icon size={16} />
@@ -15,12 +31,46 @@ function NodeHeader({ taskType }: { taskType: TaskType }) {
         <p className="text-xs font-bold uppercase text-muted-foreground">
           {task.label}
         </p>
-        <div className="flex gap-1 items-center">
+        <div className="flex gap-3 items-center">
           {task.isEntryPoint && <Badge>Entry Point!!</Badge>}
           <Badge className="gap-2 flex items-center text-xs">
-            <CoinsIcon size={16} />
-            TODO
+            {/* <CoinsIcon size={16} /> */}
+            <HandCoins size={16} />
+            {task.credits}
           </Badge>
+          {!task.isEntryPoint && (
+            <>
+              <Button
+                variant={"secondary"}
+                size={"icon"}
+                className="text-red-500 cursor-pointer"
+                onClick={() => {
+                  deleteElements({
+                    nodes: [{ id: nodeId }],
+                  });
+                }}
+              >
+                <TrashIcon size={12} />
+              </Button>
+              <Button
+                variant={"secondary"}
+                size={"icon"}
+                className="text-green-500 cursor-pointer"
+                onClick={() => {
+                  const node = getNode(nodeId) as AppNode;
+                  const newX = node.position.x;
+                  const newY = node.position.y + node.measured?.height! + 20;
+                  const newNode = CreateFlowNode(node.data.type, {
+                    x: newX,
+                    y: newY,
+                  });
+                  addNodes([newNode]);
+                }}
+              >
+                <CopyIcon size={12} />
+              </Button>
+            </>
+          )}
           <Button
             variant={"ghost"}
             size={"icon"}
